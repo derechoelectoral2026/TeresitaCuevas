@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Simulacro INE – Vocalía Ejecutiva de Junta Local Ejecutiva (VEJLE)</title>
+<style>
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+body { font-family:'Segoe UI',sans-serif; background:#fff0f6; color:#222; min-height:100dvh; overflow-x:hidden; }
+
+.header { background:linear-gradient(135deg,#880e4f,#e91e8c); color:white; padding:10px 14px; display:flex; align-items:center; gap:10px; box-shadow:0 2px 8px rgba(0,0,0,.2); position:sticky; top:0; z-index:200; }
+.header-logo { font-size:1.35rem; flex-shrink:0; }
+.header-text { flex:1; min-width:0; }
+.header h1 { font-size:.86rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.header p  { font-size:.6rem; opacity:.82; margin-top:1px; }
+.header-right { flex-shrink:0; text-align:right; }
+.timer { font-size:1.45rem; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:.5px; line-height:1; }
+.t-lbl { font-size:.55rem; opacity:.65; margin-top:1px; }
+.timer.warning { color:#ffe082; }
+.timer.danger  { color:#ff6b6b; animation:pulse 1s infinite; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:.45} }
+.progress-wrap { background:#f8bbd0; height:3px; }
+.progress-bar  { height:3px; background:#fff; transition:width .4s; }
+
+.main { padding:12px 12px 80px; max-width:600px; margin:0 auto; }
+
+.start-screen { background:white; border-radius:14px; padding:22px 16px; box-shadow:0 2px 12px rgba(0,0,0,.08); margin-top:14px; text-align:center; }
+.start-screen h2 { font-size:1.2rem; color:#880e4f; margin-bottom:10px; line-height:1.3; }
+.info-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin:15px 0; }
+.info-card { background:#fce4ec; border-radius:10px; padding:11px 8px; }
+.info-card .num { font-size:1.5rem; font-weight:800; color:#880e4f; }
+.info-card .lbl { font-size:.72rem; color:#666; margin-top:2px; }
+.topic-section { text-align:left; margin:13px 0; }
+.topic-section-title { font-size:.71rem; font-weight:800; color:#880e4f; text-transform:uppercase; letter-spacing:.4px; margin-bottom:6px; padding-left:8px; border-left:3px solid #e91e8c; }
+.topic-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:10px; }
+.topic-pill { background:#fce4ec; border-radius:7px; padding:6px 10px; font-size:.75rem; color:#880e4f; display:flex; justify-content:space-between; gap:6px; }
+.topic-pill .cnt { font-weight:800; flex-shrink:0; }
+.level-banner { background:linear-gradient(135deg,#4a148c,#880e4f); color:white; border-radius:10px; padding:10px 12px; margin:10px 0; font-size:.78rem; text-align:left; line-height:1.45; }
+.level-banner strong { color:#ffe082; }
+.formats-banner { background:#fff3e0; border-left:3px solid #ff9800; border-radius:8px; padding:9px 11px; margin:8px 0; font-size:.74rem; text-align:left; color:#5d4037; line-height:1.5; }
+.formats-banner strong { color:#e65100; }
+
+.question-card { background:white; border-radius:12px; padding:15px 13px; box-shadow:0 2px 10px rgba(0,0,0,.07); margin-bottom:12px; animation:fadeUp .25s ease; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)} }
+.q-meta { display:flex; justify-content:space-between; align-items:center; margin-bottom:11px; flex-wrap:wrap; gap:5px; }
+.q-badge { font-size:.66rem; font-weight:700; padding:3px 9px; border-radius:20px; text-transform:uppercase; }
+.q-right { display:flex; align-items:center; gap:5px; flex-wrap:wrap; }
+.q-num { color:#aaa; font-size:.75rem; }
+.q-type { font-size:.58rem; font-weight:700; padding:2px 7px; border-radius:10px; letter-spacing:.3px; }
+.q-type.seq { background:#e0f7fa; color:#006064; }
+.q-type.rel { background:#f3e5f5; color:#4a148c; }
+.q-type.cas { background:#fff3e0; color:#e65100; }
+.q-type.dir { background:#e8f5e9; color:#2e7d32; }
+.q-type.com { background:#fce4ec; color:#ad1457; }
+
+.passage { background:#fff0f6; border-left:4px solid #e91e8c; padding:10px 12px; border-radius:0 8px 8px 0; margin-bottom:12px; font-size:.83rem; line-height:1.7; }
+.passage-label { font-size:.64rem; font-weight:700; color:#880e4f; text-transform:uppercase; margin-bottom:5px; }
+
+.question-text { font-size:.9rem; font-weight:600; line-height:1.5; margin-bottom:13px; }
+
+.listado { background:#fafafa; border:1px solid #e0e0e0; border-radius:9px; padding:11px 13px; margin-bottom:13px; font-size:.83rem; line-height:1.6; }
+.listado-title { font-size:.67rem; font-weight:700; color:#555; text-transform:uppercase; margin-bottom:7px; letter-spacing:.3px; }
+.listado ol, .listado ul { padding-left:22px; margin:0; }
+.listado li { margin-bottom:4px; }
+
+.rel-cols { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; }
+.rel-col { background:#fafafa; border:1px solid #e0e0e0; border-radius:9px; padding:9px 10px; }
+.rel-col-title { font-size:.66rem; font-weight:800; color:#880e4f; text-transform:uppercase; margin-bottom:6px; letter-spacing:.3px; }
+.rel-col ol { padding-left:18px; margin:0; font-size:.8rem; line-height:1.5; }
+.rel-col ul { padding-left:0; list-style:none; margin:0; font-size:.8rem; line-height:1.5; }
+.rel-col li { margin-bottom:5px; }
+
+.options { display:flex; flex-direction:column; gap:8px; }
+.option { display:flex; align-items:flex-start; gap:10px; padding:13px 12px; border:2px solid #e0e0e0; border-radius:10px; cursor:pointer; transition:border-color .13s,background .13s; font-size:.86rem; line-height:1.45; min-height:50px; }
+.option:active:not(.disabled) { border-color:#e91e8c; background:#fce4ec33; }
+.option.selected  { border-color:#e91e8c; background:#fce4ec55; }
+.option.correct   { border-color:#4caf50; background:#e8f5e9; }
+.option.incorrect { border-color:#f44336; background:#ffebee; }
+.option.disabled  { cursor:default; }
+.option-letter { width:26px; height:26px; border-radius:50%; background:#eee; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:.75rem; flex-shrink:0; transition:background .13s,color .13s; }
+.option.selected  .option-letter { background:#e91e8c; color:white; }
+.option.correct   .option-letter { background:#4caf50; color:white; }
+.option.incorrect .option-letter { background:#f44336; color:white; }
+.opt-text { flex:1; }
+.opt-icon { flex-shrink:0; font-size:.9rem; }
+
+.explanation { margin-top:12px; padding:11px 12px; background:#fff0f6; border-radius:9px; border-left:4px solid #e91e8c; font-size:.81rem; line-height:1.65; display:none; }
+.explanation.show { display:block; }
+.explanation strong { color:#880e4f; }
+
+.ver-sol-wrap { text-align:center; margin-bottom:10px; }
+.btn-ver-sol { background:white; border:2px solid #e91e8c; color:#880e4f; padding:9px 20px; border-radius:9px; font-weight:700; font-size:.82rem; cursor:pointer; min-height:44px; transition:all .13s; }
+.btn-ver-sol:active { background:#fce4ec; }
+
+.btn { padding:10px 18px; border-radius:10px; border:none; font-size:.85rem; font-weight:700; cursor:pointer; transition:all .15s; min-height:44px; }
+.btn:active { transform:scale(.96); }
+.btn-primary   { background:linear-gradient(135deg,#880e4f,#e91e8c); color:white; }
+.btn-primary:active   { opacity:.88; }
+.btn-primary:disabled { opacity:.4; cursor:not-allowed; }
+.btn-secondary { background:#f0f0f0; color:#555; }
+.btn-secondary:active { background:#e0e0e0; }
+.btn-lg { padding:13px 26px; font-size:.92rem; border-radius:12px; }
+.btn-sm { padding:9px 15px; font-size:.8rem; min-height:40px; }
+
+.nav-bar { position:fixed; bottom:0; left:0; right:0; background:white; border-top:1px solid #e0e0e0; padding:8px 14px; padding-bottom:max(8px,env(safe-area-inset-bottom)); display:flex; justify-content:space-between; align-items:center; gap:8px; box-shadow:0 -2px 10px rgba(0,0,0,.07); z-index:200; }
+.nav-info { font-size:.77rem; color:#888; line-height:1.4; }
+.nav-info span { color:#880e4f; font-weight:700; }
+.nav-btns { display:flex; gap:7px; flex-shrink:0; }
+
+.results-screen { background:white; border-radius:14px; padding:24px 16px; box-shadow:0 2px 12px rgba(0,0,0,.08); margin-top:14px; text-align:center; }
+.score-circle { width:108px; height:108px; border-radius:50%; margin:0 auto 16px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:1.85rem; font-weight:900; color:white; }
+.score-good { background:linear-gradient(135deg,#4caf50,#81c784); }
+.score-mid  { background:linear-gradient(135deg,#ff9800,#ffb74d); }
+.score-low  { background:linear-gradient(135deg,#f44336,#e57373); }
+.score-sub  { font-size:.72rem; font-weight:600; opacity:.9; margin-top:2px; }
+.stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin:14px 0; }
+.stat-card { border-radius:10px; padding:12px 6px; }
+.stat-card .n { font-size:1.4rem; font-weight:800; }
+.stat-card .l { font-size:.7rem; margin-top:2px; }
+.stat-correct { background:#e8f5e9; color:#2e7d32; }
+.stat-wrong   { background:#ffebee; color:#c62828; }
+.stat-skip    { background:#fff8e1; color:#f57f17; }
+
+.area-row { display:grid; grid-template-columns:1fr 60px 42px; gap:7px; align-items:center; margin-bottom:9px; }
+.area-name { font-size:.78rem; font-weight:600; color:#333; text-align:left; }
+.area-bar-wrap { background:#f0f0f0; border-radius:10px; height:8px; overflow:hidden; }
+.area-bar { height:100%; border-radius:10px; transition:width .6s; }
+.area-pct { font-size:.78rem; font-weight:700; text-align:right; }
+
+.weak-banner { background:linear-gradient(135deg,#fff8e1,#ffecb3); border-left:4px solid #f9a825; padding:12px 14px; border-radius:9px; margin:13px 0; text-align:left; }
+.weak-banner h4 { color:#e65100; margin-bottom:6px; font-size:.87rem; }
+.weak-banner p  { font-size:.77rem; color:#555; margin-bottom:8px; line-height:1.5; }
+.weak-tags { display:flex; flex-wrap:wrap; gap:5px; }
+.weak-tag { background:white; color:#e65100; padding:4px 10px; border-radius:15px; font-size:.72rem; border:1px solid #ffb74d; font-weight:600; }
+
+.hidden { display:none !important; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">🏛️</div>
+  <div class="header-text">
+    <h1>Vocalía Ejecutiva Local (VEJLE)</h1>
+    <p>Nivel entidad federativa · 🔀 Aleatorio</p>
+  </div>
+  <div class="header-right">
+    <div class="timer" id="timer">50:00</div>
+    <div class="t-lbl">tiempo restante</div>
+  </div>
+</div>
+<div class="progress-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+
+<div class="main">
+  <div class="start-screen" id="startScreen">
+    <h2>🏛️ Simulacro · Vocalía Ejecutiva Local</h2>
+    <p style="background:#fce4ec;border-radius:10px;padding:10px;color:#880e4f;font-weight:600;margin-bottom:13px;font-size:.81rem">
+      🎯 VEJLE · Ámbito: entidad federativa
+    </p>
+    <div class="level-banner">
+      <strong>⚡ ENFOQUE DE NIVEL ENTIDAD</strong> — Preside el Consejo Local, coordina las Juntas Distritales de la entidad, conduce el cómputo de entidad y de circunscripción, enlaza con el OPLE y autoridades estatales, ejerce la Oficialía Electoral y sustancia en el ámbito de su competencia.
+    </div>
+    <div class="formats-banner">
+      <strong>📝 FORMATOS OFICIALES CENEVAL:</strong><br>
+      🟢 <strong>Directo:</strong> pregunta con 3 opciones sustantivas<br>
+      🩷 <strong>Completamiento:</strong> enunciado con espacio en blanco<br>
+      🔵 <strong>Ordenamiento:</strong> secuencia correcta<br>
+      🟣 <strong>Relación:</strong> vincula 2 columnas<br>
+      🟠 <strong>Caso práctico:</strong> escenario y decisión
+    </div>
+    <div class="info-grid">
+      <div class="info-card"><div class="num">40</div><div class="lbl">Preguntas</div></div>
+      <div class="info-card"><div class="num">50</div><div class="lbl">Minutos</div></div>
+      <div class="info-card"><div class="num">5</div><div class="lbl">Áreas</div></div>
+    </div>
+    <div class="topic-section">
+      <div class="topic-section-title">🗳️ 1. Participación política (5 preguntas)</div>
+      <div class="topic-grid">
+        <div class="topic-pill"><span>1.1 Partidos políticos nacionales</span><span class="cnt">3</span></div>
+        <div class="topic-pill"><span>1.2 Candidaturas independientes</span><span class="cnt">2</span></div>
+      </div>
+      <div class="topic-section-title">⚖️ 2. Justicia electoral (8 preguntas)</div>
+      <div class="topic-grid">
+        <div class="topic-pill"><span>2.1 Medios de impugnación</span><span class="cnt">5</span></div>
+        <div class="topic-pill"><span>2.2 Violencia política de género</span><span class="cnt">2</span></div>
+        <div class="topic-pill"><span>2.3 Delitos electorales</span><span class="cnt">1</span></div>
+      </div>
+      <div class="topic-section-title">🏢 3. Instituto Nacional Electoral (5 preguntas)</div>
+      <div class="topic-grid">
+        <div class="topic-pill"><span>3.1 Órganos desconcentrados</span><span class="cnt">5</span></div>
+      </div>
+      <div class="topic-section-title">📋 4. Proceso electoral (16 preguntas)</div>
+      <div class="topic-grid">
+        <div class="topic-pill"><span>4.1 Procedimientos sustantivos</span><span class="cnt">16</span></div>
+      </div>
+      <div class="topic-section-title">💼 5. Gestión administrativa (6 preguntas)</div>
+      <div class="topic-grid">
+        <div class="topic-pill"><span>5.1 Recursos financieros y materiales</span><span class="cnt">4</span></div>
+        <div class="topic-pill"><span>5.2 Gestión de recursos humanos</span><span class="cnt">2</span></div>
+      </div>
+    </div>
+    <div style="background:#f5f5f5;border-radius:9px;padding:10px 12px;margin-bottom:14px;font-size:.7rem;color:#555;text-align:left;line-height:1.6">
+      <strong style="color:#880e4f">📚 BIBLIOGRAFÍA OFICIAL (guía INE-VEJLE)</strong><br>
+      • CPEUM (2025) · LGIPE (2024) · LGSMIME (2023) · LGPP (2023) · LGMDE (2021)<br>
+      • Ley General de Transparencia y Acceso a la Información Pública (2025)<br>
+      • Políticas, Bases y Lineamientos en Adquisiciones del IFE (2013)<br>
+      • Reglamento de Quejas y Denuncias del INE (2017)<br>
+      • Manual de Normas Administrativas en Recursos Financieros del INE (2019)
+    </div>
+    <button class="btn btn-primary btn-lg" style="width:100%" onclick="startExam()">Comenzar simulacro →</button>
+  </div>
+
+  <div id="examScreen" class="hidden"></div>
+  <div id="resultsScreen" class="hidden"></div>
+</div>
+
+<div class="nav-bar hidden" id="navBar">
+  <div class="nav-info">
+    Preg. <span id="navCurrent">1</span> de <span id="navTotal">40</span>
+  </div>
+  <div class="nav-btns">
+    <button class="btn btn-secondary btn-sm" id="btnPrev" onclick="prevQ()">← Ant.</button>
+    <button class="btn btn-primary  btn-sm" id="btnNext" onclick="nextQ()">Sig. →</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   BANCO DE PREGUNTAS — VOCALÍA EJECUTIVA DE JUNTA LOCAL
+   
+   Enfoque específico del cargo VEJLE (no distrital):
+   - Preside Consejo Local (no Distrital)
+   - Coordina juntas distritales de la entidad
+   - Cómputo de entidad federativa y circunscripción
+   - Enlace con OPLE y autoridades estatales
+   - Oficialía Electoral y sustanciación auxiliar
+   
+   Distribución: 3+2+5+2+1+5+16+4+2 = 40
+═══════════════════════════════════════════════════════════════ */
+const Q = [
+
+  /* ══════════════════════════════════
+     1.1  PARTIDOS POLÍTICOS NACIONALES  (3)
+  ══════════════════════════════════ */
+  { sa:"1.1", sal:"Partidos políticos nacionales", area:"Participación política", t:"cas",
+    p:"En una entidad federativa con elección concurrente, el partido nacional 'Y' obtuvo: 2.6% de la votación válida emitida en Diputados federales, pero 4.2% en la elección local de diputaciones al Congreso estatal. En las otras elecciones federales (Senadores y Presidente) obtuvo 2.4% y 2.9% respectivamente. El Vocal Ejecutivo Local recibe consulta de los medios sobre la situación del partido en la entidad.",
+    pt:"Caso práctico · Registro federal vs local",
+    q:"Conforme a la LGPP y la LGIPE, ¿cuál es el análisis técnico correcto?",
+    o:["Conserva registro nacional pues obtuvo más del 3% en la elección local de diputaciones, que computa para el umbral federal",
+       "El umbral del 3% para conservar registro nacional se calcula exclusivamente con la votación válida emitida en las elecciones FEDERALES ordinarias (Presidente, Senadores o Diputados federales); como no alcanzó 3% en ninguna de las tres, pierde el registro nacional; la votación local no se suma al umbral federal y, en su caso, sólo afectaría el registro del partido ante el OPLE si éste lo tuviera de manera independiente",
+       "Conserva el registro nacional automáticamente porque el promedio ponderado de sus resultados supera el 3%"],
+    c:1,
+    ex:"El Art. 94 LGPP es claro: el umbral del 3% se calcula sobre la votación válida emitida en cualquiera de las elecciones FEDERALES ordinarias. La votación en elecciones locales no afecta el registro nacional (son universos jurídicos distintos). En el caso, 'Y' no alcanzó 3% en ninguna federal, por lo que pierde el registro nacional. El registro ante el OPLE se rige por la legislación local, pero eso es una cuestión distinta." },
+
+  { sa:"1.1", sal:"Partidos políticos nacionales", area:"Participación política", t:"rel",
+    relTitle:"Relacione cada actividad del partido con el órgano del INE competente para su supervisión en la entidad",
+    colA:{ title:"Actividad", items:[
+      "Fiscalización de informes de ingresos y egresos de precampañas y campañas",
+      "Verificación del cumplimiento de pautas de radio y televisión en la entidad",
+      "Registro de candidaturas al Senado de la República por la entidad",
+      "Supervisión de asambleas distritales para constitución de nuevos partidos"] },
+    colB:{ title:"Órgano competente", items:[
+      "a) La Unidad Técnica de Fiscalización del INE (ámbito central), con apoyo operativo de las juntas locales y distritales",
+      "b) El Consejo Local del INE en la entidad, con base en acuerdos del Consejo General",
+      "c) El Comité de Radio y Televisión del INE, con apoyo de la junta local para la verificación territorial de transmisiones en la entidad",
+      "d) La junta distrital en cuyo ámbito territorial se desarrolle la asamblea, bajo la coordinación de la junta local y conforme al Reglamento de Elecciones",
+      "e) La Secretaría de Gobernación federal por conducto del ejecutivo estatal"] },
+    q:"Seleccione la opción con las relaciones correctas:",
+    o:["1a, 2c, 3b, 4d",
+       "1b, 2a, 3c, 4d",
+       "1c, 2d, 3a, 4b"],
+    c:0,
+    ex:"(1) Fiscalización → Unidad Técnica de Fiscalización (órgano central) con apoyo local-distrital (a). (2) Pautas de radio y TV → Comité de Radio y Televisión con apoyo territorial de la junta local (c). (3) Registro de candidaturas al Senado por la entidad → Consejo Local (órgano colegiado con partidos en la entidad) (b). (4) Asambleas para constituir partidos → junta distrital en cuya demarcación se celebren, con coordinación local (d). La 'e' es distractor: SEGOB no tiene competencia aquí." },
+
+  { sa:"1.1", sal:"Partidos políticos nacionales", area:"Participación política", t:"com",
+    q:"Conforme a la LGPP, las prerrogativas constitucionales de los partidos políticos nacionales comprenden, entre otras, el financiamiento público, el acceso permanente a _______, la exención de determinados impuestos y el uso de franquicias postales y telegráficas.",
+    o:["radio y televisión, administrado por el INE conforme al modelo de comunicación política",
+       "los medios impresos y digitales contratados directamente por cada partido con recursos propios",
+       "la propiedad pública de inmuebles federales bajo comodato"],
+    c:0,
+    ex:"La CPEUM (Art. 41) y la LGPP establecen que el acceso de los partidos a radio y TV se realiza a través del INE, quien administra el tiempo oficial del Estado conforme al modelo de comunicación política. La contratación directa por partidos está PROHIBIDA expresamente. No existe prerrogativa de comodato de inmuebles federales." },
+
+  /* ══════════════════════════════════
+     1.2  CANDIDATURAS INDEPENDIENTES  (2)
+  ══════════════════════════════════ */
+  { sa:"1.2", sal:"Candidaturas independientes", area:"Participación política", t:"cas",
+    p:"Un aspirante a candidato independiente al Senado de la República por una entidad federativa presenta ante la Junta Local Ejecutiva 38,000 apoyos ciudadanos mediante la aplicación móvil del INE. La lista nominal de la entidad es de 3,200,000 electores. Tras verificación de la DERFE: 25,000 válidos, 8,000 duplicados y 5,000 de otras entidades.",
+    pt:"Caso práctico · Candidatura al Senado",
+    q:"Conforme a la LGIPE, ¿procede el registro de la candidatura independiente?",
+    o:["No procede pese a los 25,000 válidos: el umbral mínimo legal es el 2% de la lista nominal de la entidad (en este caso 64,000 apoyos válidos); adicionalmente se exige dispersión territorial en al menos la mitad de los distritos de la entidad con al menos 1% en cada uno",
+       "Procede automáticamente pues presentó más de 10,000 apoyos en total",
+       "Procede pues los duplicados se suman para completar el porcentaje requerido"],
+    c:0,
+    ex:"Para el Senado por entidad federativa, la LGIPE exige el 2% de la lista nominal de la entidad (doble que para diputados, que es 1% del distrito) Y dispersión territorial en al menos la mitad de los distritos con 1% en cada uno. 25,000 válidos sobre 3,200,000 equivale a 0.78%, muy por debajo del 2% requerido (64,000). Duplicados y apoyos de otras entidades no computan. La verificación la coordina la Junta Local con apoyo de la DERFE." },
+
+  { sa:"1.2", sal:"Candidaturas independientes", area:"Participación política", t:"dir",
+    q:"¿Cuál es el papel de la Junta Local Ejecutiva en el procedimiento de registro de candidaturas independientes al Senado de la República por la entidad?",
+    o:["Ninguno: el registro es exclusivamente competencia del Consejo General del INE sin intervención de órganos desconcentrados",
+       "Recibe los avisos de intención, emite la constancia de aspirante, coordina el seguimiento territorial en las juntas distritales durante la obtención de apoyos, recibe la solicitud de registro y la somete al Consejo Local correspondiente, que es el órgano competente para aprobar o negar el registro conforme a la LGIPE y el Reglamento de Elecciones",
+       "Aprueba directamente el registro sin intervención de órgano colegiado alguno"],
+    c:1,
+    ex:"En el registro de candidaturas al Senado, la Junta Local Ejecutiva tiene rol ejecutivo clave: recibe avisos de intención, emite constancias de aspirante, coordina el seguimiento territorial distrital y somete la solicitud al Consejo Local (órgano colegiado que integra representantes de partidos y es el competente para aprobar/negar el registro). El Consejo General del INE conoce vía recurso de revisión si hay impugnación." },
+
+  /* ══════════════════════════════════
+     2.1  MEDIOS DE IMPUGNACIÓN  (5)
+  ══════════════════════════════════ */
+  { sa:"2.1", sal:"Sistema de medios de impugnación", area:"Justicia electoral", t:"rel",
+    relTitle:"Relacione cada acto local con el medio impugnativo procedente conforme a la LGSMIME",
+    colA:{ title:"Acto impugnado", items:[
+      "Acto del Consejo Local del INE que niega el registro de una candidatura al Senado",
+      "Resolución del OPLE que afecta derechos político-electorales de un ciudadano",
+      "Sentencia del Tribunal Electoral local que valida elección local de gobernador",
+      "Acto del Consejo Distrital del INE durante proceso electoral federal"] },
+    colB:{ title:"Medio impugnativo idóneo", items:[
+      "a) Recurso de Apelación ante la Sala Superior del TEPJF",
+      "b) Juicio para la Protección de Derechos Político-Electorales del Ciudadano (JDC) ante la Sala Regional o Superior según competencia",
+      "c) Juicio de Revisión Constitucional Electoral (JRC) ante la Sala Superior del TEPJF",
+      "d) Recurso de Revisión ante el Consejo General del INE",
+      "e) Juicio de Inconformidad ante la Sala Regional del TEPJF"] },
+    q:"Seleccione la opción con las relaciones correctas:",
+    o:["1a, 2b, 3c, 4d",
+       "1d, 2a, 3b, 4c",
+       "1b, 2c, 3d, 4a"],
+    c:0,
+    ex:"(1) Acto del Consejo Local (órgano del INE) que niega registro → Recurso de Apelación ante Sala Superior del TEPJF (a); NO es Recurso de Revisión porque el Consejo Local no es órgano meramente ejecutivo sino colegiado. (2) Resolución del OPLE que afecta DPE → JDC (b). (3) Sentencia de Tribunal Electoral local sobre elección de gobernador → JRC (c). (4) Acto del Consejo Distrital del INE → Recurso de Revisión ante el Consejo General del INE (d). El Juicio de Inconformidad es para cómputos, no para esos actos." },
+
+  { sa:"2.1", sal:"Sistema de medios de impugnación", area:"Justicia electoral", t:"cas",
+    p:"El Consejo Local del INE en una entidad federativa dicta acuerdo por el que declara la validez de la elección de senadores por mayoría relativa. Un partido político considera que existen irregularidades graves en el cómputo de entidad que ameritan nulidad de votación en diversas casillas. La notificación del acuerdo se practicó el jueves a las 14:00 durante el proceso electoral.",
+    pt:"Caso práctico · Impugnación del cómputo de entidad",
+    q:"¿Cuál es el medio impugnativo idóneo, ante qué autoridad se interpone y cuál es el plazo?",
+    o:["Recurso de Revisión ante el Consejo General del INE, dentro de 4 días naturales",
+       "Juicio de Inconformidad ante la Sala Regional del TEPJF correspondiente a la circunscripción, dentro de 4 días naturales; durante proceso electoral, todos los días y horas son hábiles; debe acreditarse que las irregularidades son determinantes para el resultado conforme al principio de conservación de los actos válidamente celebrados",
+       "Recurso de Apelación directo ante la Sala Superior del TEPJF, dentro de 10 días naturales"],
+    c:1,
+    ex:"Los resultados de cómputos de entidad federativa (Senadores por MR), las declaraciones de validez y el otorgamiento de constancias son impugnables mediante Juicio de Inconformidad ante la Sala Regional del TEPJF de la circunscripción correspondiente, en 4 días naturales durante proceso electoral. Debe acreditarse que las irregularidades son determinantes (principio de conservación). El Recurso de Revisión es para actos de órganos desconcentrados distintos al cómputo." },
+
+  { sa:"2.1", sal:"Sistema de medios de impugnación", area:"Justicia electoral", t:"seq",
+    listadoTitle:"Actuaciones de la Junta Local al recibir un medio de impugnación contra actos propios (desordenadas):",
+    listado:[
+      "Remitir el expediente completo al Tribunal Electoral competente en el plazo legal",
+      "Publicar aviso por 72 horas para que terceros interesados comparezcan",
+      "Recibir el escrito y asentar razón del día y hora de presentación en Oficialía de Partes",
+      "Elaborar el informe circunstanciado justificando el acto impugnado",
+      "Integrar el expediente con el escrito, pruebas, comparecencias y el informe"],
+    q:"¿Cuál es la secuencia procesal correcta conforme a la LGSMIME?",
+    o:["3, 2, 5, 4, 1",
+       "3, 4, 2, 5, 1",
+       "2, 3, 5, 4, 1"],
+    c:0,
+    ex:"Orden: (3) Recepción y razón → (2) Publicación del aviso por 72 horas para terceros → (5) Integración del expediente con comparecencias y pruebas → (4) Informe circunstanciado → (1) Remisión al Tribunal. La autoridad responsable (Junta Local o Consejo Local, según el acto impugnado) NO resuelve ni rechaza: sólo tramita. El aviso a terceros se publica antes de integrar para permitir su comparecencia." },
+
+  { sa:"2.1", sal:"Sistema de medios de impugnación", area:"Justicia electoral", t:"dir",
+    q:"¿Qué particularidad procesal tiene el Recurso de Reconsideración ante la Sala Superior del TEPJF respecto al Juicio de Inconformidad resuelto por una Sala Regional?",
+    o:["Es una segunda instancia ordinaria que procede libremente contra cualquier sentencia de Sala Regional",
+       "Es recurso extraordinario que procede contra sentencias de Salas Regionales únicamente en supuestos específicos: inaplicación de normas por inconstitucionalidad, temas de importancia y trascendencia, o sentencias que afecten la asignación de diputaciones o senadurías por representación proporcional, entre otros supuestos jurisprudencialmente consolidados",
+       "Procede sólo cuando el propio ciudadano haya sido parte, nunca para partidos políticos"],
+    c:1,
+    ex:"La Reconsideración es recurso extraordinario federal ante Sala Superior del TEPJF que procede en supuestos acotados: inaplicación por inconstitucionalidad, temas de importancia y trascendencia, asuntos que afecten representación proporcional, entre otros construidos jurisprudencialmente. No es segunda instancia ordinaria (la definitividad opera con la Sala Regional) y no se restringe a ciudadanos." },
+
+  { sa:"2.1", sal:"Sistema de medios de impugnación", area:"Justicia electoral", t:"com",
+    q:"Durante el proceso electoral, los plazos para la interposición de los medios de impugnación en materia electoral se computan en _______, y todos los días y horas se consideran _______.",
+    o:["días hábiles; hábiles sólo de 9:00 a 18:00 horas",
+       "días naturales; hábiles (el cómputo es continuo)",
+       "semanas calendario; inhábiles durante fines de semana"],
+    c:1,
+    ex:"La LGSMIME establece que durante proceso electoral los plazos se computan en días naturales y todos los días y horas son hábiles (cómputo continuo de momento a momento). Fuera de proceso electoral, por regla general, se computan en días hábiles. Esta regla es crucial para el PES y para la impugnación de actos como registros y cómputos." },
+
+  /* ══════════════════════════════════
+     2.2  VIOLENCIA POLÍTICA DE GÉNERO  (2)
+  ══════════════════════════════════ */
+  { sa:"2.2", sal:"Violencia política contra las mujeres en razón de género", area:"Justicia electoral", t:"cas",
+    p:"Una presidenta municipal electa acude a la Junta Local Ejecutiva del INE en la entidad para denunciar que, durante sesiones de cabildo, regidores hombres sistemáticamente la interrumpen, minimizan sus propuestas por su condición de mujer y han publicado en redes comentarios sobre su apariencia y vida personal. Solicita medidas urgentes.",
+    pt:"Caso práctico · Competencia en VPMRG local",
+    q:"Conforme al Reglamento de Quejas y Denuncias en materia de VPMRG y la LGIPE, ¿cuál es la actuación institucional correcta?",
+    o:["La Junta Local resuelve directamente pues toda VPMRG es competencia federal",
+       "Aplicar el Protocolo con perspectiva de género y confidencialidad; por competencia material, remitir al OPLE o al Tribunal Electoral de la entidad según corresponda (la presidencia municipal es cargo local); en paralelo valorar medidas cautelares urgentes en su ámbito, dar vista a la Fiscalía Especializada si hay indicios de delito, e integrar el Registro Nacional de Personas Sancionadas en VPMRG cuando proceda sanción firme",
+       "Orientar a la denunciante a que presente demanda civil por daño moral y archivar"],
+    c:1,
+    ex:"Las conductas descritas configuran VPMRG simbólica y psicológica. La competencia se determina por el cargo (local) y la naturaleza del acto: el OPLE/Tribunal Electoral de la entidad conoce en primera instancia los asuntos locales. La Junta Local, como primer contacto, aplica el Protocolo, puede instrumentar medidas urgentes en su ámbito, remitir al competente, dar vista a FGR-FEDE si hay delito (Art. 20 Bis LGMDE), y el Registro Nacional lo administra el INE a nivel central." },
+
+  { sa:"2.2", sal:"Violencia política contra las mujeres en razón de género", area:"Justicia electoral", t:"dir",
+    q:"¿Qué efectos jurídicos tiene una sentencia firme que acredita violencia política contra una mujer en razón de género respecto a la persona responsable, conforme al régimen constitucional y legal vigente?",
+    o:["Únicamente amonestación pública sin otros efectos",
+       "Sanciones administrativas (multa, inhabilitación), medidas de reparación integral (disculpa pública, capacitación), inscripción en el Registro Nacional de Personas Sancionadas en VPMRG del INE, aplicación del '3 de 3 contra la violencia' (impedimento de postulación con sentencia firme), y eventualmente responsabilidad penal por el Art. 20 Bis LGMDE",
+       "Sólo el deber de ofrecer disculpa privada sin otras consecuencias"],
+    c:1,
+    ex:"La acreditación activa un régimen multisede: sanciones administrativas (multa, inhabilitación), reparación integral, inscripción en el Registro Nacional administrado por el INE (limita postulaciones), aplicación del '3 de 3 contra la violencia' (sentencia firme por VPMRG impide ser candidato), y responsabilidad penal por el tipo específico del Art. 20 Bis LGMDE." },
+
+  /* ══════════════════════════════════
+     2.3  DELITOS ELECTORALES  (1)
+  ══════════════════════════════════ */
+  { sa:"2.3", sal:"Delitos electorales", area:"Justicia electoral", t:"cas",
+    p:"Durante la etapa de campaña de una elección federal, el Vocal Ejecutivo Local recibe denuncias fundadas de que un funcionario estatal de alto nivel ha condicionado entregas de apoyos de un programa social a la asistencia a eventos proselitistas de un candidato. Se aportan videograbaciones, testimoniales y documentales.",
+    pt:"Caso práctico · Delito electoral por servidor público",
+    q:"Conforme a la LGMDE, ¿qué tipo penal se configura y cuál es la actuación institucional?",
+    o:["Es sólo falta administrativa; la Junta Local sólo debe documentarla para el informe de proceso",
+       "Configura al menos coacción del voto agravada por calidad de servidor público (Arts. 7 y 11 LGMDE) y presunto uso indebido de recursos públicos con fines electorales; el Vocal Ejecutivo Local documenta, informa al Consejo Local, da vista a la FGR a través de la Fiscalía Especializada en Delitos Electorales (FEDE) y, en paralelo, puede iniciarse procedimiento administrativo sancionador vía UTCE; también procede vista al OIC de la entidad por posibles violaciones a la imparcialidad",
+       "Únicamente procede denuncia por la vía civil del daño moral"],
+    c:1,
+    ex:"La conducta configura varios ilícitos: coacción del voto agravada por calidad de servidor público y uso indebido de recursos públicos (LGMDE). La actuación de la VEJLE incluye múltiples vistas simultáneas: (1) FEDE para ejercicio de acción penal; (2) UTCE para PES administrativo; (3) OIC estatal por violación a imparcialidad y neutralidad del servidor público (LGRA). Es un caso clásico de concurrencia de responsabilidades." },
+
+  /* ══════════════════════════════════
+     3.1  ÓRGANOS DESCONCENTRADOS  (5)
+  ══════════════════════════════════ */
+  { sa:"3.1", sal:"Órganos desconcentrados", area:"Instituto Nacional Electoral", t:"rel",
+    relTitle:"Relacione cada atribución con el órgano desconcentrado al que corresponde (LGIPE)",
+    colA:{ title:"Atribución", items:[
+      "Presidir el Consejo Local y dar seguimiento a las sesiones de cómputo distrital",
+      "Realizar el cómputo distrital y la declaración de validez de la elección de diputados por MR en el distrito",
+      "Realizar el cómputo de entidad federativa de senadores por MR y el de circunscripción plurinominal",
+      "Integrar las mesas directivas de casilla y capacitar a los funcionarios"] },
+    colB:{ title:"Órgano competente", items:[
+      "a) Consejo Local del INE",
+      "b) Consejo Distrital del INE",
+      "c) Junta Distrital Ejecutiva (función ejecutiva)",
+      "d) Secretaría Ejecutiva del INE",
+      "e) Vocal Ejecutivo de Junta Local Ejecutiva (VEJLE)"] },
+    q:"Seleccione la opción con las relaciones correctas:",
+    o:["1e, 2b, 3a, 4c",
+       "1a, 2e, 3b, 4d",
+       "1c, 2a, 3e, 4b"],
+    c:0,
+    ex:"(1) Presidir el Consejo Local y dar seguimiento a cómputos distritales es atribución del VEJLE (e). (2) Cómputo distrital y declaración de validez de diputados por MR → Consejo Distrital (b). (3) Cómputo de entidad (senadores por MR) y de circunscripción → Consejo Local (a). (4) Integración de mesas directivas y capacitación → Junta Distrital, función ejecutiva de la Vocalía de Capacitación (c). La 'd' es distractor." },
+
+  { sa:"3.1", sal:"Órganos desconcentrados", area:"Instituto Nacional Electoral", t:"dir",
+    q:"¿Cuál es la relación funcional correcta entre la Junta Local Ejecutiva y las Juntas Distritales Ejecutivas de su entidad?",
+    o:["Son órganos autónomos entre sí sin jerarquía institucional",
+       "La Junta Local coordina, supervisa y da seguimiento a las juntas distritales de la entidad; el Vocal Ejecutivo Local funge como superior jerárquico inmediato de los Vocales Ejecutivos Distritales en su entidad, da lineamientos operativos conforme a la normativa aplicable, evalúa resultados y articula el trabajo territorial; las juntas distritales conservan sus atribuciones propias y responden por su ejecución",
+       "La Junta Distrital es superior jerárquica de la Junta Local en temas operativos"],
+    c:1,
+    ex:"El diseño de los órganos desconcentrados del INE articula jerarquía funcional: la Junta Local coordina y supervisa a las juntas distritales de su entidad; el VEJLE es superior jerárquico inmediato de los vocales ejecutivos distritales de la entidad. Cada junta conserva atribuciones propias conforme a la LGIPE, pero el trabajo territorial se articula bajo coordinación local para uniformidad y eficiencia." },
+
+  { sa:"3.1", sal:"Órganos desconcentrados", area:"Instituto Nacional Electoral", t:"com",
+    q:"Conforme a la LGIPE, el Vocal Ejecutivo de Junta Local Ejecutiva preside la Junta Local Y funge como _______ del Consejo Local, con _______.",
+    o:["Secretario; voz y voto",
+       "Presidente; voz y voto en todas las decisiones",
+       "Secretario; voz pero sin voto en las deliberaciones del órgano colegiado"],
+    c:2,
+    ex:"Tanto a nivel local como distrital el diseño institucional es el mismo: el Vocal Ejecutivo PRESIDE la Junta Ejecutiva (órgano técnico permanente) pero funge como SECRETARIO del Consejo (órgano colegiado deliberativo temporal con representantes de partidos y consejeros electorales) con VOZ pero SIN VOTO. Esta figura garantiza coordinación técnica-operativa con la representación política sin concentrar funciones ejecutivas y de voto decisorio." },
+
+  { sa:"3.1", sal:"Órganos desconcentrados", area:"Instituto Nacional Electoral", t:"cas",
+    p:"En una entidad, durante el proceso electoral concurrente, la Junta Local detecta inconsistencias operativas importantes en una Junta Distrital: retrasos en visitas a ciudadanos sorteados, incumplimiento de reportes y quejas de SE y CAE sobre su Vocal Ejecutivo Distrital. El calendario electoral avanza.",
+    pt:"Caso práctico · Supervisión de Junta Distrital",
+    q:"¿Cuál es la actuación institucional correcta del VEJLE?",
+    o:["Remover inmediata y unilateralmente al Vocal Ejecutivo Distrital para preservar la operación",
+       "Intervenir conforme a sus atribuciones: documentar las inconsistencias, reunirse con el Vocal Ejecutivo Distrital para requerir plan de corrección con plazos, dar seguimiento cercano, escalar a la DECEyEC y a la DESPEN los hallazgos que lo ameriten, y en casos graves instrumentar medidas dentro del marco del SPEN (observaciones al desempeño, y en supuestos de faltas graves y acreditadas, denuncia ante la instancia competente del Servicio); siempre respetando el debido proceso y el régimen estatutario",
+       "Abstenerse de actuar pues la Junta Local no tiene facultades de supervisión sobre las distritales"],
+    c:1,
+    ex:"La VEJLE tiene responsabilidad coordinadora sobre las juntas distritales de su entidad. Ante inconsistencias operativas: documentación, requerimiento de plan de corrección, seguimiento, escalamiento institucional (DECEyEC por operación; DESPEN por cuestiones de servicio profesional), y en casos graves instrumentar medidas dentro del marco estatutario. La remoción unilateral violaría el régimen del SPEN y el debido proceso. La abstención incumpliría deberes de supervisión." },
+
+  { sa:"3.1", sal:"Órganos desconcentrados", area:"Instituto Nacional Electoral", t:"dir",
+    q:"Respecto a la integración del Consejo Local del INE en una entidad federativa, ¿cómo se compone el órgano?",
+    o:["Únicamente por el Vocal Ejecutivo Local y los demás vocales de la Junta Local",
+       "Por seis Consejeros Electorales designados por el Consejo General del INE, un Consejero Presidente (el Vocal Ejecutivo Local), un representante por cada partido político nacional con derecho a ello, y el Vocal Secretario (el Vocal Secretarial) con voz pero sin voto; funciona sólo durante el proceso electoral federal",
+       "Por representantes del gobierno estatal y del poder judicial local de manera paritaria"],
+    c:1,
+    ex:"Conforme a la LGIPE, el Consejo Local se integra por: seis Consejeros Electorales (con derecho a voz y voto) designados por el Consejo General del INE; el Consejero Presidente, que por ministerio de ley es el Vocal Ejecutivo Local (con voz y voto); un representante por cada partido político nacional acreditado (con voz, sin voto); y el Secretario, que es el Vocal Secretarial de la Junta Local (voz sin voto). Funciona durante el proceso electoral federal." },
+
+  /* ══════════════════════════════════
+     4.1  PROCEDIMIENTOS SUSTANTIVOS  (16)
+  ══════════════════════════════════ */
+  { sa:"4.1", sal:"Procedimientos sustantivos", area:"Proceso electoral", t:"seq",
+    listadoTitle:"Etapas del proceso electoral federal ordinario (LGIPE, desordenadas):",
+    listado:[
+      "Dictamen y declaraciones de validez de la elección de Presidente de la República",
+      "Jornada electoral",
+      "Preparación de la elección",
+      "Resultados y declaraciones de validez de las elecciones de Diputados y Senadores"],
+    q:"¿Cuál es la secuencia correcta conforme al Art. 208 de la LGIPE?",
+    o:["3, 2, 4, 1",
+       "2, 3, 4, 1",
+       "3, 4, 2, 1"],
+    c:0,
+    ex:"Las cuatro etapas del proceso electoral federal son, en orden: (3) Preparación → (2) Jornada electoral → (4) Resultados y declaraciones de validez de Diputados y Senadores → (1) Dictamen y declaraciones de validez de Presidente de la República. La etapa presidencial es la última porque su calificación final corresponde al TEPJF." },
+
+  { sa:"4.1", sal:"Procedimientos sustantivos", area:"Proceso electoral", t:"dir",
+    q:"¿Qué sesión de cómputo preside el Vocal Ejecutivo de Junta Local Ejecutiva durante el proceso electoral federal?",
+    o:["Únicamente los cómputos distritales de todos los distritos de su entidad",
+       "Preside la sesión de cómputo de entidad federativa de Senadores por mayoría relativa y, en su caso, el cómputo de la circunscripción plurinominal cuando la cabecera sea la entidad; además da seguimiento a las sesiones de cómputo distrital realizadas por los Consejos Distritales de su entidad",
+       "No preside ningún cómputo; su función se limita a funciones administrativas"],
+    c:1,
+    ex:"Conforme a la LGIPE y al perfil del cargo (guía INE-VEJLE), el VEJLE preside el Consejo Local y conduce el cómputo de entidad (Senadores por MR) y el de circunscripción plurinominal cuando la cabecera corresponda a la entidad. Adicionalmente da seguimiento a los cómputos distritales. Esta función distingue al VEJLE del VED, quien preside el Consejo Distrital y conduce el cómputo distrital." },
+
+  { sa:"4.1", sal:"Procedimientos sustantivos", area:"Proceso electoral", t:"seq",
+    listadoTitle:"Procedimiento para integrar Mesas Directivas de Casilla (LGIPE, desordenadas):",
+    listado:[
+      "Insaculación del 13% del total de ciudadanos de cada sección electoral, sin que el número sea menor a 50",
+      "Determinación de las funciones que cada ciudadano desempeñará según su escolaridad",
+      "Notificación del nombramiento a los integrantes de las mesas directivas",
+      "Capacitación de los ciudadanos seleccionados y elección de aquellos que resulten aptos",
+      "Sorteo de las 26 letras del alfabeto para obtener una con la que se seleccionará a los ciudadanos",
+      "Insaculación de los ciudadanos que no tengan impedimento para desempeñarse en un cargo",
+      "Sorteo del mes del calendario que será la base, junto con el siguiente, para la insaculación"],
+    q:"¿Cuál es la secuencia correcta conforme al Art. 254 de la LGIPE?",
+    o:["7, 1, 4, 5, 6, 2, 3",
+       "1, 4, 7, 6, 5, 2, 3",
+       "2, 3, 4, 5, 7, 1, 6"],
+    c:0,
+    ex:"Orden conforme al Art. 254 LGIPE: (7) Sorteo del MES base → (1) Primera INSACULACIÓN del 13% → (4) CAPACITACIÓN y selección de aptos → (5) Sorteo de la LETRA → (6) Segunda INSACULACIÓN entre capacitados aptos → (2) DETERMINACIÓN de funciones por escolaridad → (3) NOTIFICACIÓN. Este es el reactivo ejemplo que aparece textualmente en la guía oficial." },
+
+  { sa:"4.1", sal:"Procedimientos sustantivos", area:"Proceso electoral", t:"rel",
+    relTitle:"Relacione cada herramienta oficial con su naturaleza jurídica",
+    colA:{ title:"Instrumento", items:["PREP","Conteo Rápido","Cómputo de entidad"] },
+    colB:{ title:"Naturaleza", items:[
+      "a) Procedimiento oficial realizado por el Consejo Local, que suma los cómputos distritales de la entidad y puede incluir recuentos en supuestos normados",
+      "b) Ejercicio estadístico con muestra probabilística aprobada por el Consejo General; resultados con intervalos de confianza, informativo pero riguroso",
+      "c) Sistema informativo que difunde resultados preliminares conforme se capturan actas; cifras no oficiales",
+      "d) Resolución jurisdiccional de validez emitida por la Sala Superior del TEPJF"] },
+    q:"Seleccione la opción con las relaciones correctas:",
+    o:["1c, 2b, 3a",
+       "1a, 2c, 3b",
+       "1b, 2a, 3c"],
+    c:0,
+    ex:"PREP (c): sistema informativo preliminar, NO oficial. Conteo Rápido (b): ejercicio estadístico con muestra probabilística e intervalos de confianza, informativo pero riguroso. Cómputo de entidad (a): procedimiento OFICIAL realizado por el Consejo Local, que suma cómputos distritales y puede incluir recuentos. La 'd' es distractor." },
+
+  { sa:"4.1", sal:"Procedimientos sustantivos", area:"Proceso electoral", t:"cas",
+    p:"Durante el cómputo de entidad en una elección de Senadores por MR, la diferencia entre el primer y segundo lugar es de 0.8%. El representante del partido que ocupa el segundo lugar solicita formalmente el recuento total en la sesión del Consejo Local.",
+    pt:"Caso práctico · Procedencia del recuento total",
+    q:"Conforme a la LGIPE, ¿procede el recuento total y cómo se organiza?",
+    o:["No procede: el recuento total sólo aplica para elecciones presidenciales, no para senadurías",
+       "Procede: la LGIPE permite recuento total cuando la diferencia entre primer y segundo lugar sea igual o menor al 1% y exista solicitud expresa del representante del segundo lugar; el Consejo Local lo aprueba y organiza en grupos de trabajo simultáneos conforme al acuerdo respectivo, dando intervención a las representaciones partidistas",
+       "Procede sólo si lo solicitan todos los partidos por unanimidad en una sesión pública"],
+    c:1,
+    ex:"La LGIPE establece que el recuento total procede en cómputos de entidad (para Senadores por MR) cuando la diferencia entre primer y segundo lugar es ≤ 1% y existe solicitud expresa del representante que ocupa el segundo lugar. El Consejo Local lo realiza en grupos de trabajo simultáneos para eficiencia. No requiere unanimidad partidista y sí aplica para senadurías." },
+
+  { sa:"4.1", sal:"Procedimientos sustantivos", area:"Proceso electoral", t:"com",
+    q:"Durante el proceso electoral, el Vocal Ejecutivo de Junta Local dirige la instrumentación y operación del sistema sobre el desarrollo de la jornada electoral (SIJE) para mantener informados a los consejos General, Local y distritales, _______ .",
+    o:["así como al Organismo Público Local Electoral (OPLE) de la entidad",
+       "excluyendo al OPLE pues se trata exclusivamente de elecciones federales",
+       "informando únicamente a la prensa acreditada"],
+    c:0,
+    ex:"Conforme a las atribuciones descritas en el perfil del cargo VEJLE (publicado por la DESPEN), el Vocal Ejecutivo Local dirige el SIJE durante la jornada para mantener informados a los consejos General, Local, distritales y al OPLE. Esta coordinación con el OPLE es especialmente relevante en procesos electorales concurrentes (federales y locales simultáneos)." },
+
+  { sa:"4.1", sal:"Procedimientos sustantivos", area:"Proceso electoral", t:"cas",
+    p:"En una entidad con elección concurrente 2024-2025 (Proceso Electoral Extraordinario del Poder Judicial de la Federación), el Consejo Local debe conducir cómputos con múltiples ámbitos territoriales simultáneos.",
+    pt:"Caso práctico · Cómputos del PEE del PJF",
+    q:"Conforme a los Lineamientos aprobados por el Consejo General del INE, ¿qué particularidad tuvieron los cómputos en sede local?",
+    o:["Fueron idénticos a los de elecciones ordinarias de senadores",
+       "Se desarrollaron cómputos específicos por cargo con ámbitos territoriales distintos (nacional para Ministros/Magistrados TEPJF, circunscripción para Magistrados de circuito, circuito judicial para jueces, y entidad federativa según correspondiera); los Consejos Locales instrumentaron procedimientos conforme a los lineamientos específicos del Consejo General, con múltiples tipos de acta y boletas diferenciadas por cargo",
+       "No intervinieron los Consejos Locales; todo se concentró en el Consejo General"],
+    c:1,
+    ex:"El Proceso Electoral Extraordinario del Poder Judicial de la Federación 2024-2025 fue un ejercicio sin precedentes con múltiples capas territoriales simultáneas: ámbito nacional (Ministros SCJN, Magistrados TEPJF), por circunscripción plurinominal, por circuito judicial y por entidad federativa. Los Consejos Locales realizaron cómputos específicos conforme a los Lineamientos del Consejo General, con sistemas diferenciados por tipo de cargo, implicando complejidad operativa significativamente mayor que una elección ordinaria." },
+
+  { sa:"4.1", sal:"Procedimientos sustantivos", area:"Proceso electoral", t:"dir",
+    q:"¿Qué particularidades operativas aplican al voto anticipado para personas en prisión preventiva y personas con movilidad reducida, conforme a los Lineamientos y Modelo de Operación aprobados por el Consejo General?",
+    o:["Sólo aplica a personas en el extranjero; no existe voto anticipado doméstico",
+       "Aplica a personas en prisión preventiva (que conservan derechos político-electorales por no ser sentenciadas) y a personas con movilidad reducida severa; se emite en fechas previas a la jornada con procedimientos específicos: urnas especiales, sellado y resguardo, personal acreditado, actas específicas y traslado custodiado hasta el escrutinio junto con las casillas regulares",
+       "Aplica a cualquier ciudadano que lo solicite con 60 días de anticipación"],
+    c:1,
+    ex:"El voto anticipado opera conforme a Lineamientos y Modelo de Operación aprobados por el Consejo General del INE, dirigido a personas en prisión preventiva (con derechos político-electorales vigentes) y personas con movilidad reducida severa. Procedimientos de control: urnas especiales, sellado, custodia, personal acreditado, actas específicas y traslado seguro hasta el escrutinio junto con las casillas regulares." },
+
+  { sa:"4.1", sal:"Procedimientos sustantivos", area:"Proceso electoral", t:"cas",
+    p:"El día de la jornada electoral, el Presidente de una MDC no se presenta a las 7:30. A las 8:15 tampoco se ha presentado el primer suplente. Están el Secretario propietario, ambos Escrutadores propietarios y electores de la fila.",
+    pt:"Caso práctico · Sustitución en casilla",
+    q:"¿Cómo debe procederse para la instalación conforme a la LGIPE?",
+    o:["No puede instalarse; se levanta acta circunstanciada y se remite al Consejo Distrital",
+       "Aplica el corrimiento: Secretario → Presidente, Primer Escrutador → Secretario, Segundo Escrutador → Primer Escrutador; si falta integrante puede habilitarse a un elector de la fila que esté en la Lista Nominal de la sección como Segundo Escrutador, siempre que no sea representante ni candidato; se asienta en el Acta de Jornada",
+       "Se espera hasta las 10:00; si persiste la ausencia, el CAE designa a cualquier persona de su confianza"],
+    c:1,
+    ex:"La LGIPE regula corrimiento y sustitución: funcionarios propietarios → suplentes → corrimiento en cargos → electores de la fila que estén en la Lista Nominal de la sección. Restricciones: el sustituto no puede ser representante ni candidato y debe estar en la Lista Nominal. Todo se asienta en el Acta de Jornada y en el Acta de Incidentes. Su omisión configura causal de nulidad." },
+
+  { sa:"4.1", sal:"Procedimientos sustantivos", area:"Proceso electoral", t:"dir",
+    q:"Respecto a las casillas especiales, ¿qué restricciones normativas aplican conforme a la LGIPE?",
+    o:["Pueden votar todos los ciudadanos que presenten credencial, para todos los cargos, sin límite",
+       "Sólo votan electores fuera de su sección para cargos de ámbito nacional y/o de su circunscripción según corresponda; hay cupo limitado por casilla (tradicionalmente 750 boletas); se inscriben en listado adicional específico; se prohíbe votar cargos que requieran coincidencia territorial estricta",
+       "Sólo se instalan en aeropuertos en elecciones presidenciales"],
+    c:1,
+    ex:"Las casillas especiales tienen restricciones: cupo limitado (tradicionalmente 750 boletas), listado adicional específico de votantes en tránsito, y sólo votan cargos de ámbito nacional o territorialmente compatibles (Presidente siempre; Senadores/Diputados según circunscripción). No operan para cargos que exijan residencia estricta." },
+
+  { sa:"4.1", sal:"Procedimientos sustantivos", area:"Proceso electoral", t:"rel",
+    relTitle:"Relacione cada tipo de casilla con su característica operativa (LGIPE)",
+    colA:{ title:"Tipo de casilla", items:["Básica","Contigua","Extraordinaria","Especial"] },
+    colB:{ title:"Característica", items:[
+      "a) Se instala en la misma sección cuando el número de electores excede el máximo permitido por casilla",
+      "b) Se instala en puntos de afluencia para electores en tránsito fuera de su sección; cupo limitado; sólo cargos compatibles",
+      "c) Se instala en la sección electoral principal",
+      "d) Se instala en zonas de difícil acceso o circunstancias especiales de la geografía seccional",
+      "e) Se instala exclusivamente para personal del INE en oficinas centrales"] },
+    q:"Seleccione la opción con las relaciones correctas:",
+    o:["1c, 2a, 3d, 4b",
+       "1a, 2c, 3b, 4d",
+       "1d, 2b, 3a, 4c"],
+    c:0,
+    ex:"BÁSICA (c) → primera casilla de la sección. CONTIGUA (a) → cuando se supera el máximo de electores por casilla. EXTRAORDINARIA (d) → zonas de difícil acceso. ESPECIAL (b) → electores en tránsito con cupo limitado y cargos compatibles. La 'e' es distractor." },
+
+  { sa:"4.1", sal:"Procedimientos sustantivos", area:"Proceso electoral", t:"dir",
+    q:"Respecto al Voto de los Mexicanos Residentes en el Extranjero (VMRE), ¿qué controles de seguridad aplican al voto electrónico por internet?",
+    o:["Es idéntico al voto postal sin controles tecnológicos adicionales",
+       "Requiere inscripción previa al LNERE, credencial vigente, autenticación multifactor, cifrado extremo a extremo, separación criptográfica entre identidad del votante y contenido del voto (anonimización), auditorías técnicas por terceros y cumplimiento de los lineamientos específicos del Consejo General",
+       "Sólo requiere conexión a internet y número de credencial"],
+    c:1,
+    ex:"El SIVEI integra: inscripción al LNERE, credenciales de acceso, autenticación multifactor, cifrado extremo a extremo, separación criptográfica entre identidad y voto (anonimización), bitácoras, auditorías técnicas por terceros, conforme a los lineamientos del Consejo General." },
+
+  { sa:"4.1", sal:"Procedimientos sustantivos", area:"Proceso electoral", t:"cas",
+    p:"En una entidad federativa con elección concurrente, se presentan diferencias operativas entre el INE y el OPLE respecto a la ubicación de casillas únicas. El VEJLE debe coordinar con el OPLE.",
+    pt:"Caso práctico · Coordinación con el OPLE",
+    q:"¿Cuál es el marco normativo y operativo de la coordinación?",
+    o:["El OPLE tiene autonomía absoluta y no debe coordinar con el INE en casillas únicas",
+       "La ubicación y operación de casillas únicas en elecciones concurrentes es competencia del INE; la coordinación con el OPLE se rige por el Reglamento de Elecciones, convenios de colaboración y lineamientos específicos del Consejo General; el VEJLE encabeza la articulación operativa en la entidad, respetando las facultades de cada autoridad y los principios de certeza, legalidad y máxima publicidad",
+       "El INE debe acatar todas las decisiones operativas del OPLE sin cuestionarlas"],
+    c:1,
+    ex:"La LGIPE y el Reglamento de Elecciones establecen que la ubicación e integración de casillas (incluso únicas en elecciones concurrentes) es competencia del INE. La coordinación con el OPLE se formaliza vía convenios y lineamientos del Consejo General. El VEJLE articula operativamente la relación en la entidad, respetando atribuciones y principios rectores. Ni autonomía absoluta del OPLE ni subordinación del INE." },
+
+  { sa:"4.1", sal:"Procedimientos sustantivos", area:"Proceso electoral", t:"dir",
+    q:"¿Cómo opera el principio de paridad de género en las postulaciones y cómo se verifica a nivel Consejo Local en elecciones de Senadores?",
+    o:["Es recomendación sin carácter vinculante",
+       "Es mandato constitucional (Art. 41 CPEUM) y legal: 50% mujeres y 50% hombres, fórmulas del mismo género, paridad horizontal (no concentrar mujeres en entidades 'perdedoras') y alternancia; el Consejo Local verifica que la postulación del partido cumpla con estos parámetros en las fórmulas de la entidad y, en caso de incumplimiento, se requiere al partido y, persistiendo, se niega el registro conforme a criterios del TEPJF",
+       "Sólo aplica para elecciones locales; en federales no hay obligación"],
+    c:1,
+    ex:"La paridad de género es mandato constitucional desarrollado en LGIPE/LGPP y jurisprudencia TEPJF: 50/50, fórmulas del mismo género, paridad horizontal y alternancia. A nivel Consejo Local se verifica la postulación en las fórmulas al Senado por la entidad. Incumplimiento → requerimiento → negativa de registro si persiste." },
+
+  { sa:"4.1", sal:"Procedimientos sustantivos", area:"Proceso electoral", t:"dir",
+    q:"Respecto al ejercicio de la Oficialía Electoral, que puede ser ejercida por ministerio de ley por el Vocal Secretarial de la Junta Local, ¿qué función cumple en el proceso electoral?",
+    o:["Es una función meramente protocolaria sin efectos jurídicos",
+       "Da fe pública de actos y hechos en materia electoral, certifica documentos, realiza inspecciones oculares, certifica contenidos en medios impresos y digitales, y auxilia a los procedimientos sancionadores con pruebas documentales de valor probatorio reforzado; su ejercicio se rige por la LGIPE y el Reglamento de la Oficialía Electoral",
+       "Sólo certifica elecciones internas de partidos políticos"],
+    c:1,
+    ex:"La Oficialía Electoral (Art. 355 LGIPE y Reglamento de Oficialía Electoral) es función de fe pública en materia electoral: certifica hechos, documentos, realiza inspecciones oculares (físicas o virtuales), certifica contenidos digitales, y sus certificaciones tienen valor probatorio pleno en PES y POS. A nivel local la ejerce el Vocal Secretarial y por extensión, en su caso, los Vocales Secretariales Distritales en su ámbito." },
+
+  { sa:"4.1", sal:"Procedimientos sustantivos", area:"Proceso electoral", t:"com",
+    q:"Conforme a la LGIPE, en los cómputos de entidad federativa, el Consejo Local sumará los resultados consignados en las actas de cómputo distrital de los distritos que integran la entidad y _______, conforme a lo dispuesto en la Ley y en los acuerdos del Consejo General.",
+    o:["podrá ordenar recuentos parciales o totales en los supuestos normados",
+       "deberá abstenerse de cualquier verificación adicional de los resultados distritales",
+       "remitirá directamente al Tribunal sin declarar validez"],
+    c:0,
+    ex:"El Consejo Local, en el cómputo de entidad, suma los resultados de los cómputos distritales de la entidad y puede ordenar recuentos totales o parciales en los supuestos que la ley y los acuerdos del Consejo General prevean (diferencia ≤ 1% con solicitud, inconsistencias de actas, etc.). La Declaración de Validez y entrega de constancia corresponde al propio Consejo Local para Senadores por MR." },
+
+  /* ══════════════════════════════════
+     5.1  RECURSOS FINANCIEROS Y MATERIALES  (4)
+  ══════════════════════════════════ */
+  { sa:"5.1", sal:"Recursos financieros y materiales", area:"Gestión administrativa", t:"rel",
+    relTitle:"Relacione cada procedimiento de contratación con su supuesto de procedencia (Reglamento de Adquisiciones del INE / Políticas 2013)",
+    colA:{ title:"Procedimiento", items:["Licitación pública","Invitación a cuando menos tres personas","Adjudicación directa"] },
+    colB:{ title:"Supuesto", items:[
+      "a) Montos intermedios conforme a umbrales anuales o licitación pública declarada desierta",
+      "b) Montos superiores a los umbrales anuales; regla general que favorece competencia y transparencia",
+      "c) Montos menores o excepciones fundadas y motivadas (urgencia, exclusividad, caso fortuito, emergencia)",
+      "d) Cualquier monto a discreción del titular del órgano sin sujeción a reglas"] },
+    q:"Seleccione la opción con las relaciones correctas:",
+    o:["1b, 2a, 3c",
+       "1a, 2b, 3c",
+       "1c, 2a, 3b"],
+    c:0,
+    ex:"Licitación pública (b): regla general, montos superiores. Invitación a tres (a): montos intermedios o licitación desierta. Adjudicación directa (c): montos menores o excepciones fundadas. La 'd' es distractor. Todos los procedimientos se sujetan a umbrales anuales y requieren integración de expediente." },
+
+  { sa:"5.1", sal:"Recursos financieros y materiales", area:"Gestión administrativa", t:"seq",
+    listadoTitle:"Documentos del expediente de adquisición en la Junta Local (desordenados):",
+    listado:[
+      "Contrato firmado entre el INE y el proveedor adjudicado",
+      "Cotizaciones de los proveedores y cuadro comparativo",
+      "Suficiencia presupuestal que acredite disponibilidad",
+      "Requerimiento del área usuaria con especificaciones técnicas",
+      "Acta de entrega-recepción del bien o servicio"],
+    q:"¿Cuál es la secuencia correcta conforme al Manual de Normas Administrativas?",
+    o:["4, 3, 2, 1, 5",
+       "3, 4, 1, 2, 5",
+       "4, 2, 1, 3, 5"],
+    c:0,
+    ex:"Orden: (4) REQUERIMIENTO → (3) SUFICIENCIA presupuestal → (2) COTIZACIONES y cuadro comparativo → (1) CONTRATO → (5) ENTREGA-RECEPCIÓN. Sin suficiencia presupuestal previa no puede formalizarse la contratación." },
+
+  { sa:"5.1", sal:"Recursos financieros y materiales", area:"Gestión administrativa", t:"cas",
+    p:"Una Junta Local Ejecutiva requiere contratar el arrendamiento de inmuebles auxiliares para bodegas de resguardo de material electoral en tres distritos durante el proceso electoral. El monto agregado supera los umbrales de adjudicación directa.",
+    pt:"Caso práctico · Arrendamiento local",
+    q:"¿Cuál es el procedimiento idóneo y qué debe observar el VEJLE?",
+    o:["Adjudicación directa inmediata con el primer arrendador disponible",
+       "Conforme al monto y al Reglamento de Adquisiciones, procede invitación a cuando menos tres personas o licitación pública según el umbral anual; el VEJLE debe coordinar con el Vocal de Administración para integrar expediente completo (requerimiento, suficiencia, cotizaciones, justificación técnica), verificar que los inmuebles cumplen requisitos operativos y de seguridad, y formalizar contratos con entrega-recepción documentada",
+       "Licitación pública única central obligatoria desde Oficinas centrales del INE"],
+    c:1,
+    ex:"Por monto agregado superior al umbral de adjudicación directa, procede invitación a tres o licitación conforme al Reglamento y umbrales anuales. El VEJLE coordina con el Vocal de Administración el proceso completo: expediente, verificación técnica, formalización y documentación. Las adquisiciones se pueden ejecutar desconcentradamente por la Junta Local dentro del marco normativo." },
+
+  { sa:"5.1", sal:"Recursos financieros y materiales", area:"Gestión administrativa", t:"dir",
+    q:"¿Qué diferencia existe entre el fondo revolvente y los recursos programados conforme al Manual de Normas Administrativas en Materia de Recursos Financieros del INE (2019)?",
+    o:["Son el mismo instrumento sin diferencias",
+       "Fondo revolvente: asignación para gastos menores, urgentes y de operación cotidiana con topes por erogación, comprobable contra facturas y al cierre del ejercicio. Recursos programados: partidas presupuestales para proyectos, contratos o actividades específicas del anteproyecto anual, con procedimientos y comprobación conforme al programa; ambos sujetos a disciplina presupuestal",
+       "Sólo el fondo revolvente requiere comprobación; los programados se ejercen sin comprobar"],
+    c:1,
+    ex:"Fondo revolvente: anticipo para gastos operativos menores con topes, reposición periódica y liquidación al cierre. Recursos programados: partidas para proyectos o actividades del anteproyecto, con procedimientos específicos de ejercicio y comprobación. Ambos se rigen por disciplina presupuestal, austeridad y registro contable." },
+
+  /* ══════════════════════════════════
+     5.2  GESTIÓN DE RECURSOS HUMANOS  (2)
+  ══════════════════════════════════ */
+  { sa:"5.2", sal:"Gestión de recursos humanos", area:"Gestión administrativa", t:"rel",
+    relTitle:"Relacione cada figura de personal del INE con su régimen (Estatuto del SPEN y personal de rama administrativa 2024)",
+    colA:{ title:"Figura", items:[
+      "Miembro del SPEN en rama ejecutiva (p. ej. VEJLE)",
+      "Personal de la rama administrativa del INE",
+      "Personal eventual (CAE, SE contratados para el proceso)"] },
+    colB:{ title:"Régimen aplicable", items:[
+      "a) Contratación temporal por proceso electoral, con procedimientos reglados de selección y sin estabilidad posterior",
+      "b) Ingreso por concurso de oposición del Servicio, evaluación periódica, capacitación obligatoria, permanencia por mérito, régimen disciplinario específico",
+      "c) Condiciones generales de trabajo del INE y normativa interna; permanencia ordinaria bajo el régimen laboral aplicable",
+      "d) Designación libre y directa del Consejero Presidente sin requisitos"] },
+    q:"Seleccione la opción con las relaciones correctas:",
+    o:["1b, 2c, 3a",
+       "1a, 2b, 3c",
+       "1c, 2a, 3b"],
+    c:0,
+    ex:"SPEN rama ejecutiva (b): concurso de oposición, evaluación, capacitación, permanencia por mérito. Rama administrativa (c): condiciones generales de trabajo y normativa interna, permanencia ordinaria. Personal eventual CAE/SE (a): temporal, procedimientos reglados, sin estabilidad posterior. La 'd' es distractor." },
+
+  { sa:"5.2", sal:"Gestión de recursos humanos", area:"Gestión administrativa", t:"cas",
+    p:"El VEJLE recibe información fundada de que una persona miembro del SPEN, adscrita como jefa de oficina en una Junta Distrital de su entidad, habría incurrido en conductas reiteradas de hostigamiento laboral hacia dos subordinadas. Las denunciantes acuden directamente al VEJLE por considerarlo máxima autoridad en la entidad.",
+    pt:"Caso práctico · Protocolo y escalamiento",
+    q:"Conforme al Protocolo del INE y el Estatuto del SPEN, ¿cuál es la actuación correcta?",
+    o:["Remover inmediata y unilateralmente a la presunta responsable para proteger a las denunciantes",
+       "Aplicar el Protocolo para Prevenir, Atender, Sancionar y Reparar el Hostigamiento: recepción con perspectiva de género y confidencialidad, informar sobre canales formales (OIC, Unidad Técnica de Igualdad, DESPEN), adoptar medidas provisionales de separación y prevención de represalias, documentar los hechos, dar aviso institucional y escalar a las instancias competentes del Servicio Profesional; la omisión del superior ante conocimiento de los hechos configura responsabilidad administrativa propia conforme a la LGRA",
+       "Orientar a las denunciantes a presentar demanda laboral en tribunales de trabajo"],
+    c:1,
+    ex:"El Protocolo del INE aplica con independencia del rango jerárquico. Actuación del VEJLE: (1) recepción con perspectiva de género y confidencialidad; (2) información de canales formales; (3) medidas provisionales de separación; (4) documentación; (5) aviso institucional y escalamiento a DESPEN/OIC. La omisión del superior ante conocimiento configura responsabilidad administrativa. La remoción unilateral viola el régimen estatutario y el debido proceso." }
+
+];
+
+/* ═══════════════════════════════════════════════════
+   ALEATORIZACIÓN
+═══════════════════════════════════════════════════ */
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function shuffleOptions(q) {
+  const indices = [0, 1, 2];
+  const shuffled = shuffleArray(indices);
+  return { ...q, o: shuffled.map(i => q.o[i]), c: shuffled.indexOf(q.c) };
+}
+const SUBS = ["1.1","1.2","2.1","2.2","2.3","3.1","4.1","5.1","5.2"];
+const shuffledQ = SUBS.flatMap(sub =>
+  shuffleArray(Q.filter(q => q.sa === sub)).map(q => shuffleOptions(q))
+);
+Q.length = 0;
+shuffledQ.forEach(q => Q.push(q));
+
+const TIME_LIMIT = 50 * 60;
+let answers, revealed, current, timerInterval, secondsLeft;
+
+const SS = {
+  "1.1":{bg:"#fce4ec",color:"#880e4f",icon:"🗳️"},
+  "1.2":{bg:"#fce4ec",color:"#ad1457",icon:"🙋"},
+  "2.1":{bg:"#e8eaf6",color:"#1a237e",icon:"⚖️"},
+  "2.2":{bg:"#f3e5f5",color:"#6a1b9a",icon:"🚩"},
+  "2.3":{bg:"#ffebee",color:"#b71c1c",icon:"🚫"},
+  "3.1":{bg:"#e3f2fd",color:"#0d47a1",icon:"🏢"},
+  "4.1":{bg:"#e0f7fa",color:"#006064",icon:"📋"},
+  "5.1":{bg:"#fff8e1",color:"#f57f17",icon:"💰"},
+  "5.2":{bg:"#e8f5e9",color:"#1b5e20",icon:"👥"}
+};
+
+const TYPE_LABELS = {
+  "dir":{ cls:"dir", label:"🟢 DIRECTO" },
+  "cas":{ cls:"cas", label:"🟠 CASO" },
+  "seq":{ cls:"seq", label:"🔵 ORDENAM." },
+  "rel":{ cls:"rel", label:"🟣 RELACIÓN" },
+  "com":{ cls:"com", label:"🩷 COMPLETAM." }
+};
+
+function startExam() {
+  answers  = new Array(Q.length).fill(null);
+  revealed = new Array(Q.length).fill(false);
+  current  = 0;
+  document.getElementById('startScreen').classList.add('hidden');
+  document.getElementById('examScreen').classList.remove('hidden');
+  document.getElementById('navBar').classList.remove('hidden');
+  renderQuestion(0);
+  startTimer();
+}
+
+function renderQuestion(idx) {
+  current = idx;
+  const q = Q[idx], sc = SS[q.sa] || {bg:"#fce4ec",color:"#880e4f",icon:"📌"};
+  const isR = revealed[idx], sel = answers[idx];
+
+  let ph = '';
+  if (q.p) ph = `<div class="passage"><div class="passage-label">📄 ${q.pt}</div>${q.p.replace(/\n/g,'<br>')}</div>`;
+
+  let listadoHTML = '';
+  if (q.t === 'seq' && q.listado) {
+    const items = q.listado.map((it, i) => `<li><strong>${i+1}.</strong> ${it}</li>`).join('');
+    listadoHTML = `<div class="listado">
+      <div class="listado-title">📋 ${q.listadoTitle || 'Elementos a ordenar'}</div>
+      <ul style="list-style:none;padding-left:0">${items}</ul>
+    </div>`;
+  }
+
+  let relHTML = '';
+  if (q.t === 'rel' && q.colA && q.colB) {
+    const aItems = q.colA.items.map((it, i) => `<li><strong>${i+1}.</strong> ${it}</li>`).join('');
+    const bItems = q.colB.items.map(it => `<li>${it}</li>`).join('');
+    relHTML = `<div class="listado">
+      <div class="listado-title">🔗 ${q.relTitle || 'Relacione las columnas'}</div>
+      <div class="rel-cols">
+        <div class="rel-col">
+          <div class="rel-col-title">${q.colA.title}</div>
+          <ul style="list-style:none;padding-left:0">${aItems}</ul>
+        </div>
+        <div class="rel-col">
+          <div class="rel-col-title">${q.colB.title}</div>
+          <ul>${bItems}</ul>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  const L = ['A','B','C'];
+  const opts = q.o.map((o, i) => {
+    let cls = 'option', icon = '';
+    if (isR) {
+      cls += ' disabled';
+      if (i === q.c) { cls += ' correct'; icon = '<span class="opt-icon">✅</span>'; }
+      else if (i === sel && i !== q.c) { cls += ' incorrect'; icon = '<span class="opt-icon">❌</span>'; }
+    } else if (i === sel) cls += ' selected';
+    return `<div class="${cls}" onclick="selOpt(${idx},${i})">
+      <div class="option-letter">${L[i]}</div>
+      <div class="opt-text">${o}</div>${icon}
+    </div>`;
+  }).join('');
+
+  const ri = isR && sel !== null && sel !== q.c
+    ? ['A','B','C'][sel] + ' era incorrecta'
+    : '';
+
+  const typeInfo = TYPE_LABELS[q.t] || TYPE_LABELS["dir"];
+  const typeBadge = `<span class="q-type ${typeInfo.cls}">${typeInfo.label}</span>`;
+
+  document.getElementById('examScreen').innerHTML = `
+    <div class="question-card">
+      <div class="q-meta">
+        <span class="q-badge" style="background:${sc.bg};color:${sc.color}">${sc.icon} ${q.sal}</span>
+        <div class="q-right">${typeBadge}<span class="q-num">${idx+1}/${Q.length}</span></div>
+      </div>
+      ${ph}
+      ${listadoHTML}
+      ${relHTML}
+      <div class="question-text">${q.q}</div>
+      <div class="options">${opts}</div>
+      <div class="explanation ${isR ? 'show' : ''}"><strong>${ri}${ri ? ' — ' : ''}Explicación:</strong> ${q.ex}</div>
+    </div>
+    ${!isR && answers[idx] !== null
+      ? `<div class="ver-sol-wrap"><button class="btn-ver-sol" onclick="rev(${idx})">Ver explicación 💡</button></div>`
+      : ''}
+  `;
+
+  document.getElementById('progressBar').style.width = ((idx+1)/Q.length*100) + '%';
+  document.getElementById('navCurrent').textContent = idx + 1;
+  document.getElementById('navTotal').textContent   = Q.length;
+  document.getElementById('btnPrev').disabled = idx === 0;
+  document.getElementById('btnNext').textContent = idx === Q.length-1 ? '🏁 Finalizar' : 'Sig. →';
+  window.scrollTo({top: 0, behavior: 'instant'});
+}
+
+function selOpt(qi, oi) { if (revealed[qi]) return; answers[qi] = oi; renderQuestion(qi); }
+function rev(idx) { revealed[idx] = true; renderQuestion(idx); }
+function nextQ() { if (current < Q.length-1) renderQuestion(current+1); else showResults(); }
+function prevQ() { if (current > 0) renderQuestion(current-1); }
+
+function startTimer() {
+  secondsLeft = TIME_LIMIT;
+  timerInterval = setInterval(() => {
+    secondsLeft--;
+    const m = Math.floor(secondsLeft/60).toString().padStart(2,'0');
+    const s = (secondsLeft%60).toString().padStart(2,'0');
+    const el = document.getElementById('timer');
+    el.textContent = `${m}:${s}`;
+    el.className = 'timer' + (secondsLeft < 300 ? ' danger' : secondsLeft < 600 ? ' warning' : '');
+    if (secondsLeft <= 0) { clearInterval(timerInterval); showResults(); }
+  }, 1000);
+}
+
+function showResults() {
+  clearInterval(timerInterval);
+  document.getElementById('examScreen').classList.add('hidden');
+  document.getElementById('navBar').classList.add('hidden');
+
+  const total    = Q.length;
+  const answered = answers.filter(a => a !== null).length;
+  const correct  = answers.filter((a, i) => a === Q[i].c).length;
+  const wrong    = answered - correct;
+  const skipped  = total - answered;
+  const pct      = Math.round(correct / total * 100);
+
+  const areas = {};
+  Q.forEach((q, i) => {
+    if (!areas[q.area]) areas[q.area] = {total:0, correct:0};
+    areas[q.area].total++;
+    if (answers[i] === q.c) areas[q.area].correct++;
+  });
+
+  const subs = {};
+  Q.forEach((q, i) => {
+    if (!subs[q.sa]) subs[q.sa] = {label:q.sal, total:0, correct:0};
+    subs[q.sa].total++;
+    if (answers[i] === q.c) subs[q.sa].correct++;
+  });
+
+  const types = {};
+  Q.forEach((q, i) => {
+    const t = q.t || "dir";
+    if (!types[t]) types[t] = {total:0, correct:0};
+    types[t].total++;
+    if (answers[i] === q.c) types[t].correct++;
+  });
+
+  const weak = Object.entries(subs).filter(([,s]) => s.correct/s.total < 0.6).map(([,s]) => s.label);
+  const cc   = pct >= 70 ? 'score-good' : pct >= 50 ? 'score-mid' : 'score-low';
+  const msg  = pct >= 80 ? '¡Excelente! Dominas el ámbito de la Vocalía Ejecutiva Local.'
+             : pct >= 60 ? 'Buen nivel. Refuerza los temas marcados.'
+             : 'Diagnóstico listo. Estudia los temas señalados antes del examen.';
+
+  const areaColors = {
+    "Participación política":    "#880e4f",
+    "Justicia electoral":        "#1a237e",
+    "Instituto Nacional Electoral":"#0d47a1",
+    "Proceso electoral":         "#006064",
+    "Gestión administrativa":    "#1b5e20"
+  };
+
+  const rows = Object.entries(areas).map(([name, a]) => {
+    const p    = Math.round(a.correct / a.total * 100);
+    const icon = p >= 80 ? '✅' : p >= 60 ? '⚠️' : '❌';
+    const bc   = p >= 60
+      ? `linear-gradient(90deg,${areaColors[name]||'#880e4f'},#e91e8c)`
+      : 'linear-gradient(90deg,#c62828,#ef5350)';
+    return `<div class="area-row">
+      <div class="area-name">${icon} ${name}</div>
+      <div class="area-bar-wrap"><div class="area-bar" style="width:${p}%;background:${bc}"></div></div>
+      <div class="area-pct" style="color:${p>=60?'#880e4f':'#c62828'}">${p}%</div>
+    </div>`;
+  }).join('');
+
+  const typeLabelsMap = {"dir":"🟢 Directo","cas":"🟠 Caso","seq":"🔵 Ordenam.","rel":"🟣 Relación","com":"🩷 Completam."};
+  const typeRows = Object.entries(types).map(([t, a]) => {
+    const p = Math.round(a.correct / a.total * 100);
+    const bc = p >= 60
+      ? 'linear-gradient(90deg,#880e4f,#e91e8c)'
+      : 'linear-gradient(90deg,#c62828,#ef5350)';
+    return `<div class="area-row">
+      <div class="area-name">${typeLabelsMap[t]} (${a.correct}/${a.total})</div>
+      <div class="area-bar-wrap"><div class="area-bar" style="width:${p}%;background:${bc}"></div></div>
+      <div class="area-pct" style="color:${p>=60?'#880e4f':'#c62828'}">${p}%</div>
+    </div>`;
+  }).join('');
+
+  const wb = weak.length
+    ? `<div class="weak-banner"><h4>🎯 Estudia esto primero:</h4><p>Menos del 60% en estas subáreas. Son clave para el cargo.</p><div class="weak-tags">${weak.map(t=>`<span class="weak-tag">📌 ${t}</span>`).join('')}</div></div>`
+    : `<div style="background:#fce4ec;border-radius:10px;padding:13px;margin:13px 0;color:#880e4f;font-weight:600">✅ ¡Dominas todas las áreas!</div>`;
+
+  const tu = TIME_LIMIT - secondsLeft;
+  const tm = Math.floor(tu/60), ts = tu%60;
+
+  document.getElementById('resultsScreen').innerHTML = `
+    <div class="results-screen">
+      <div style="background:#fce4ec;border-radius:10px;padding:9px 14px;margin-bottom:16px;font-size:.8rem;color:#880e4f;font-weight:600">
+        📋 DIAGNÓSTICO · VOCALÍA EJECUTIVA LOCAL — ${new Date().toLocaleDateString('es-MX')}
+      </div>
+      <div class="score-circle ${cc}">${pct}%<div class="score-sub">${correct}/${total}</div></div>
+      <h2 style="margin-bottom:7px">${msg}</h2>
+      <p style="margin-bottom:18px;color:#777;font-size:.83rem">Tiempo: ${tm}m ${ts}s · Respondidas: ${answered}/${total}</p>
+      <div class="stats-grid">
+        <div class="stat-card stat-correct"><div class="n">${correct}</div><div class="l">✅ Correctas</div></div>
+        <div class="stat-card stat-wrong"><div class="n">${wrong}</div><div class="l">❌ Incorrectas</div></div>
+        <div class="stat-card stat-skip"><div class="n">${skipped}</div><div class="l">⏭️ Saltadas</div></div>
+      </div>
+      ${wb}
+      <div style="text-align:left;margin-bottom:22px">
+        <h3 style="font-size:.87rem;font-weight:700;color:#444;margin-bottom:9px">Desempeño por área</h3>
+        ${rows}
+      </div>
+      <div style="text-align:left;margin-bottom:22px">
+        <h3 style="font-size:.87rem;font-weight:700;color:#444;margin-bottom:9px">Desempeño por tipo de reactivo</h3>
+        ${typeRows}
+      </div>
+      <div style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-primary btn-lg" onclick="reviewExam()">Revisar con explicaciones</button>
+        <button class="btn btn-secondary btn-lg" onclick="location.reload()">🔀 Nuevo diagnóstico</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('resultsScreen').classList.remove('hidden');
+  window.scrollTo(0, 0);
+}
+
+function reviewExam() {
+  document.getElementById('resultsScreen').classList.add('hidden');
+  document.getElementById('examScreen').classList.remove('hidden');
+  document.getElementById('navBar').classList.remove('hidden');
+  revealed = revealed.map(() => true);
+  renderQuestion(0);
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>
